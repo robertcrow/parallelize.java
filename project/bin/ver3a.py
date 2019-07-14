@@ -2,9 +2,10 @@ import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+from numba import jit
 
+@jit(nopython=True)
 def fdm():
-
     rho = 7800
     cp = 500
     lam = 46
@@ -18,7 +19,7 @@ def fdm():
     hx = 0.001
     hy = 0.001
     tau = 1 / (a * 12 * (1 / hx**2 + 1 / hy**2))
-    maxiter = 50
+    maxiter = 10
 
     Nx = int(B / hx)
     Ny = int(A / hy)
@@ -107,6 +108,8 @@ def fdm():
 
     return T
 
+
+
 start = time.time()
 T = fdm()
 end = time.time()
@@ -117,10 +120,9 @@ B = 1.6
 hx = 0.001
 hy = 0.001
 fig, ax = plt.subplots()
-X, Y = np.meshgrid(np.arange(0.0,B,hx), np.arange(0.0, A, hy))
+X, Y = np.meshgrid(np.arange(0.0, B, hx), np.arange(0.0, A, hy))
 surf = ax.contourf(X, Y, np.transpose(T), rstride=1, cstride=1,
-        map='jet', edgecolor='none', aspect='equal')
+                   map='jet', edgecolor='none', aspect='equal')
 ax.axis('equal')
 cbar = fig.colorbar(surf)
-
 plt.show()

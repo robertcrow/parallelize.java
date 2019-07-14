@@ -2,10 +2,10 @@ import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+from numba import jit
 
+@jit(nopython=True, nogil=True)
 def fdm():
-
-    
     rho = 7800
     cp = 500
     lam = 46
@@ -19,7 +19,7 @@ def fdm():
     hx = 0.001
     hy = 0.001
     tau = 1 / (a * 12 * (1 / hx ** 2 + 1 / hy ** 2))
-    maxiter = 50
+    maxiter = 10000
 
     Nx = int(B / hx)
     Ny = int(A / hy)
@@ -85,8 +85,6 @@ def fdm():
         # interior
         for i in range(1, Nx-1):
             for j in range(1, Ny-1):
-        # for j in range(1, Ny-1):
-        #     for i in range(1, Nx-1):
                 T_new[i, j] = T[i, j] * (1 - 2 * cx - 2 * cy) + cx * T[i - 1, j] + cx * T[i + 1, j] + cy * T[
                     i, j - 1] + cy * T[i, j + 1]
 
@@ -96,8 +94,9 @@ def fdm():
     return T
 
 
+
 start = time.time()
-T = fdm()
+fdm()
 end = time.time()
 print(end - start)
 

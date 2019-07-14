@@ -2,10 +2,11 @@ import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+import numba
 
+
+@numba.jit(nopython=True, parallel=True, nogil=True)
 def fdm():
-
-    
     rho = 7800
     cp = 500
     lam = 46
@@ -19,7 +20,7 @@ def fdm():
     hx = 0.001
     hy = 0.001
     tau = 1 / (a * 12 * (1 / hx ** 2 + 1 / hy ** 2))
-    maxiter = 50
+    maxiter = 10
 
     Nx = int(B / hx)
     Ny = int(A / hy)
@@ -40,11 +41,11 @@ def fdm():
     T[Nx - 1, 0] = (Tb + Tr) / 2
     T[Nx - 1, Ny - 1] = (Tt + Tr) / 2
 
-    for i in range(1, Nx - 1):
+    for i in numba.prange(1, Nx - 1):
         T[i, 0] = Tb
         T[i, Ny-1] = Tt
 
-    for j in range(1, Ny - 1):
+    for j in numba.prange(1, Ny - 1):
         T[0, j] = Tl
         T[Nx-1, j] = Tr
 
@@ -66,7 +67,7 @@ def fdm():
                                 2 * cx * T[Nx - 1, Ny - 2] + (Tr + Tt) * c1
 
         # left and right boundaries
-        for i in range(1, Ny-1):
+        for i in numba.prange(1, Ny-1):
             T_new[0, i] = T[0][i] * (1 - 2 * a * tau - 2 * cx) + a * tau * T[0, i - 1] + a * tau * T[
                 0, i + 1] + 2 * cx * T[1, i] + c2 * Tl
 
@@ -75,7 +76,7 @@ def fdm():
                                c2 * Tr + 2 * cx * T[Nx - 2, i]
 
         # top and bottom boundaries
-        for j in range(1, Nx-1):
+        for j in numba.prange(1, Nx-1):
             T_new[j, 0] = T[j][0] * (1 - 2 * a * tau - 2 * cx) + a * tau * T[j - 1, 0] + a * tau * T[
                 j + 1, 0] + 2 * cx * T[j, 1] + c2 * Tb
 
@@ -84,9 +85,7 @@ def fdm():
 
         # interior
         for i in range(1, Nx-1):
-            for j in range(1, Ny-1):
-        # for j in range(1, Ny-1):
-        #     for i in range(1, Nx-1):
+            for j in numba.prange(1, Ny-1):
                 T_new[i, j] = T[i, j] * (1 - 2 * cx - 2 * cy) + cx * T[i - 1, j] + cx * T[i + 1, j] + cy * T[
                     i, j - 1] + cy * T[i, j + 1]
 

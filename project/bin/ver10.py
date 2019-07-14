@@ -85,8 +85,14 @@ def fdm():
         # interior
         for i in range(1, Nx-1):
             for j in range(1, Ny-1):
-        # for j in range(1, Ny-1):
-        #     for i in range(1, Nx-1):
+
+                _t = None
+                send = None
+
+                if rank == 0:
+                    Tt = T[:, j+1]
+
+
                 T_new[i, j] = T[i, j] * (1 - 2 * cx - 2 * cy) + cx * T[i - 1, j] + cx * T[i + 1, j] + cy * T[
                     i, j - 1] + cy * T[i, j + 1]
 
